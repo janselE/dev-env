@@ -1,0 +1,32 @@
+alias dstart='
+  # Remove existing container if it exists (ensures no outdated container remains)
+  if docker ps -a --format "{{.Names}}" | grep -q "^dev-env$"; then
+    docker rm -f dev-env >/dev/null 2>&1
+  fi
+
+  # Start a new container
+  docker run -dit \
+    --name dev-env \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v $HOME:$HOME \
+    -v /mnt:/mnt \
+    -w "$(pwd)" \
+    vim-conf:1.0.0 bash
+
+  # Attach to the container
+  # docker exec -it dev-env bash
+'
+
+vim() {
+    docker exec -it -w "$(pwd)" dev-env nvim "$@"
+}
+
+nvim() {
+    docker exec -it -w "$(pwd)" dev-env nvim "$@"
+}
+
+tmux() {
+    docker exec -it -w "$(pwd)" dev-env tmux -2 "$@"
+}
+
+
