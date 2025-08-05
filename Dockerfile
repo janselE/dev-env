@@ -1,9 +1,12 @@
 FROM ubuntu:22.04
 
-# Set non-interactive environment for apt
+# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV BAT_THEME=Nord
 ENV PATH="$PATH:/opt/nvim-linux-x86_64/bin"
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Update system and install dependencies
 RUN apt-get update && apt-get install -y \
@@ -17,9 +20,6 @@ RUN apt-get update && apt-get install -y \
     bat \
     fzf \
     fd-find \
-    ripgrep \
-    fd-find \
-    zoxide \ 
     jq \
     ncdu \
     tldr \
@@ -37,6 +37,20 @@ RUN mkdir -p /etc/apt/keyrings && \
     chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list && \
     apt-get update && apt-get install -y eza && \
     rm -rf /var/lib/apt/lists/*
+
+# set up the Docker apt repository
+COPY install_docker.sh /tmp/install.sh
+
+# Make it executable and run it
+RUN chmod +x /tmp/install.sh && /tmp/install.sh
+
+# Install docker
+RUN apt-get install -y \
+      docker-ce \
+      docker-ce-cli \
+      containerd.io \
+      docker-buildx-plugin \
+      docker-compose-plugin
 
 
 # Install Neovim (latest from GitHub)
@@ -72,10 +86,7 @@ RUN pip install pylint
 # Clone fzf-git.sh repo
 RUN git clone https://github.com/junegunn/fzf-git.sh.git /root/fzf-git
 
-# Set working directory
-WORKDIR /workspace
-
- # Copy custom bashrc
+# Copy custom bashrc
 COPY .custom_bashrc /root/.custom_bashrc
 
 # Source it from bashrc
@@ -88,21 +99,9 @@ RUN apt update && apt install -y locales \
     && locale-gen en_US.UTF-8 \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
-# set up the Docker apt repository
-COPY install_docker.sh /tmp/install.sh
-
-# Make it executable and run it
-RUN chmod +x /tmp/install.sh && /tmp/install.sh
-
-# Install docker
-RUN apt-get install -y \
-      docker-ce \
-      docker-ce-cli \
-      containerd.io \
-      docker-buildx-plugin \
-      docker-compose-plugin
-
-
-ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
+# Install zeoxide
+RUN curl -fsSL https://apt.cli.rs/pubkey.asc | tee -a /usr/share/keyrings/rust-tools.asc
+RUN curl -fsSL https://apt.cli.rs/rust-tools.list | tee /etc/apt/sources.list.d/rust-tools.list
+RUN apt update
+RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
 
