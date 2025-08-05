@@ -13,9 +13,6 @@ RUN apt-get update && apt-get install -y \
     neofetch \
     tmux \
     python3-pip \
-    docker.io \
-    docker-compose \ 
-    docker-compose-plugin \ 
     luarocks \
     bat \
     fzf \
@@ -90,6 +87,21 @@ RUN apt-get update && apt-get install -y \
 RUN apt update && apt install -y locales \
     && locale-gen en_US.UTF-8 \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
+# set up the Docker apt repository
+COPY install_docker.sh /tmp/install.sh
+
+# Make it executable and run it
+RUN chmod +x /tmp/install.sh && /tmp/install.sh
+
+# Install docker
+RUN apt-get install -y \
+      docker-ce \
+      docker-ce-cli \
+      containerd.io \
+      docker-buildx-plugin \
+      docker-compose-plugin
+
 
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
