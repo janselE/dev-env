@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     bat \
     fzf \
     fd-find \
+    xclip \ 
     jq \
     ncdu \
     tldr \
@@ -104,6 +105,3 @@ RUN curl -fsSL https://apt.cli.rs/pubkey.asc | tee -a /usr/share/keyrings/rust-t
 RUN curl -fsSL https://apt.cli.rs/rust-tools.list | tee /etc/apt/sources.list.d/rust-tools.list
 RUN apt update
 RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-
-# TESTING
-RUN apt update && apt install -y xclip

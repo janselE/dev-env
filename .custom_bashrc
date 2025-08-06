@@ -58,6 +58,30 @@ _fzf_comprun() {
   esac
 }
 
+# Colors
+RESET='\[\033[0m\]'
+BOLD='\[\033[1m\]'
+RED='\[\033[0;31m\]'
+GREEN='\[\033[0;32m\]'
+YELLOW='\[\033[0;33m\]'
+BLUE='\[\033[0;34m\]'
+MAGENTA='\[\033[0;35m\]'
+CYAN='\[\033[0;36m\]'
+
+# sets colors
+color_prompt=yes
+
+# Function to get the current Git branch
+parse_git_branch() {
+    git branch 2>/dev/null | sed -n '/\* /s///p'
+}
+
+if [ "$color_prompt" = yes ]; then
+    PS1='${debian_chroot:+($debian_chroot)}'"${BOLD}${GREEN}\u${RESET}"'@'"${CYAN}\h${RESET}"':'"${BLUE}\w${RESET}"'$(branch=$(parse_git_branch); [ -n "$branch" ] && echo " ${YELLOW} $branch${RESET}")\n➜ '
+else
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+fi
+
 
 # setting zoxide (keep at the end)
 eval "$(zoxide init --cmd cd bash)"
