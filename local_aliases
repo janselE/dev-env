@@ -11,7 +11,7 @@ alias dstart='
     -v $HOME:$HOME \
     -v /mnt:/mnt \
     -w "$(pwd)" \
-    vim-conf:1.0.0 bash
+    dev:1.0.0 bash
 
   # Attach to the container
   # docker exec -it dev-env bash
