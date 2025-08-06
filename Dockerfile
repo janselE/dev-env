@@ -105,3 +105,5 @@ RUN curl -fsSL https://apt.cli.rs/rust-tools.list | tee /etc/apt/sources.list.d/
 RUN apt update
 RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
 
+# TESTING
+RUN apt update && apt install -y xclip

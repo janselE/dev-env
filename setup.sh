@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# THESE ARE COMMANDS THAT ARE RAN ON HOST
+
 # Build the docker image
 docker build -t dev:1.0.0 .
 
@@ -25,6 +27,7 @@ alias dstart='
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v \$HOME:\$HOME \
     -v /mnt:/mnt \
+    -v /tmp/nvim-socket:/tmp/nvim-socket \
     -w "\$(pwd)" \
     dev:1.0.0 bash
 
@@ -32,9 +35,12 @@ alias dstart='
   # docker exec -it dev-env bash
 '
 
+
 vim() {
+
     docker exec -it -w "\$(pwd)" dev-env nvim "\$@"
 }
+
 
 nvim() {
     docker exec -it -w "\$(pwd)" dev-env nvim "\$@"
@@ -46,5 +52,7 @@ tmux() {
 $BLOCK_END
 EOF
 fi
+
+sudo apt install neovim python3-neovim
 
 source ~/.bashrc
