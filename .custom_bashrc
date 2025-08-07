@@ -73,11 +73,13 @@ color_prompt=yes
 
 # Function to get the current Git branch
 parse_git_branch() {
-    git branch 2>/dev/null | sed -n '/\* /s///p'
+    git rev-parse --abbrev-ref HEAD 2>/dev/null
+
 }
 
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}'"${BOLD}${GREEN}\u${RESET}"'@'"${CYAN}\h${RESET}"':'"${BLUE}\w${RESET}"'$(branch=$(parse_git_branch); [ -n "$branch" ] && echo " ${YELLOW} $branch${RESET}")\n➜ '
+    PS1="${debian_chroot:+($debian_chroot)}${BOLD}${GREEN}\u${RESET}@${CYAN}\h${RESET}:${BLUE}\w${RESET} \$(branch=\$(parse_git_branch); [ -n \"\$branch\" ] && echo \" ${YELLOW} \$branch${RESET}\")\n➜ "
+
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi

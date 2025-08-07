@@ -27,6 +27,8 @@ alias dstart='
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v \$HOME:\$HOME \
     -v /mnt:/mnt \
+    -v $HOME/.gitconfig:$HOME/.gitconfig:ro \ 
+    -v $HOME/.ssh:$HOME/.ssh:ro \
     -v /tmp/nvim-socket:/tmp/nvim-socket \
     -w "\$(pwd)" \
     dev:1.0.0 bash
