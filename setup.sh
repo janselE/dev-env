@@ -5,7 +5,6 @@
 # Build the docker image
 docker build -t dev:1.0.0 .
 
-
 # BASHRC="$HOME/.bashrc"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
@@ -17,7 +16,6 @@ else
     echo "Unknown OS type: $OSTYPE"
     BASHRC="$HOME/.bashrc"  # fallback
 fi
-
 BLOCK_START="# >>> docker dev-env aliases >>>"
 BLOCK_END="# <<< docker dev-env aliases <<<"
 
@@ -25,39 +23,33 @@ BLOCK_END="# <<< docker dev-env aliases <<<"
 if ! grep -q "$BLOCK_START" "$BASHRC"; then
   cat << EOF >> "$BASHRC"
 $BLOCK_START
-alias dstart='
-  # Remove existing container if it exists (ensures no outdated container remains)
-  if docker ps -a --format "{{.Names}}" | grep -q "^dev-env$"; then
-    docker rm -f dev-env >/dev/null 2>&1
+devstart() {
+  local compose_file="$(pwd)/docker-compose.yml"
+  if [ ! -f "\$compose_file" ]; then
+    echo "Error: docker-compose.yml not found in current directory."
+    return 1
   fi
-
-  # Start a new container
-  docker run -dit \
-    --name dev-env \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v \$HOME:\$HOME \
-    -v /mnt:/mnt \
-    -v /tmp/nvim-socket:/tmp/nvim-socket \
-    -w "\$(pwd)" \
-    dev:1.0.0 bash
-
-  # Attach to the container
-  # docker exec -it dev-env bash
-'
+  docker compose -f "\$compose_file" down
+  docker compose -f "\$compose_file" up -d
+}
 
 
 vim() {
 
+  if docker ps --format '{{.Names}}' | grep -q '^dev-env$'; then
     docker exec -it -w "\$(pwd)" dev-env nvim "\$@"
+  else
+    command vim "\$@"
+  fi
 }
 
-
-nvim() {
-    docker exec -it -w "\$(pwd)" dev-env nvim "\$@"
-}
 
 tmux() {
+  if docker ps --format '{{.Names}}' | grep -q '^dev-env$'; then
     docker exec -it -w "\$(pwd)" dev-env tmux -2 "\$@"
+  else
+    command tmux "\$@"
+  fi
 }
 $BLOCK_END
 EOF

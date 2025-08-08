@@ -1,4 +1,31 @@
-export TERM=xterm-256color
+# export TERM=xterm-256color
+#
+# Colors
+RESET='\[\033[0m\]'
+BOLD='\[\033[1m\]'
+RED='\[\033[0;31m\]'
+GREEN='\[\033[0;32m\]'
+YELLOW='\[\033[0;33m\]'
+BLUE='\[\033[0;34m\]'
+MAGENTA='\[\033[0;35m\]'
+CYAN='\[\033[0;36m\]'
+
+# sets colors
+color_prompt=yes
+
+# Function to get the current Git branch
+parse_git_branch() {
+    git rev-parse --abbrev-ref HEAD 2>/dev/null
+
+}
+
+if [ "$color_prompt" = yes ]; then
+    PS1="${debian_chroot:+($debian_chroot)}${BOLD}${GREEN}\u${RESET}@${CYAN}\h${RESET}:${BLUE}\w${RESET} \$(branch=\$(parse_git_branch); [ -n \"\$branch\" ] && echo \" ${YELLOW} \$branch${RESET}\")\n➜ "
+
+else
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+fi
+
 
 # Aliases
 alias ls="eza -a --color=always --git --no-filesize --icons=always --no-time --no-user --no-permissions"
@@ -23,6 +50,7 @@ export FZF_DEFAULT_COMMAND="fdfind --hidden --strip-cwd-prefix --exclude .git"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND="fdfind --type=d --hidden --strip-cwd-prefix --exclude .git"
 
+
 # Use fd (https://github.com/sharkdp/fd) for listing path candidates.
 # - The first argument to the function ($1) is the base path to start traversal
 # - See the source code (completion.{bash,zsh}) for the details.
@@ -35,8 +63,7 @@ _fzf_compgen_dir() {
   fdfind --type=d --hidden --exclude .git . "$1"
 }
 
-source ~/fzf-git/fzf-git.sh
-
+# source ~/fzf-git/fzf-git.sh
 
 show_file_or_dir_preview="if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi"
 
@@ -58,33 +85,17 @@ _fzf_comprun() {
   esac
 }
 
-# Colors
-RESET='\[\033[0m\]'
-BOLD='\[\033[1m\]'
-RED='\[\033[0;31m\]'
-GREEN='\[\033[0;32m\]'
-YELLOW='\[\033[0;33m\]'
-BLUE='\[\033[0;34m\]'
-MAGENTA='\[\033[0;35m\]'
-CYAN='\[\033[0;36m\]'
+# simlink to fd
+# ln -s $(which fdfind) ~/.local/bin/fd
+LINK="$HOME/.local/bin/fd"
+TARGET="$(which fdfind)"
 
-# sets colors
-color_prompt=yes
-
-# Function to get the current Git branch
-parse_git_branch() {
-    git branch 2>/dev/null | sed -n '/\* /s///p'
-}
-
-if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}'"${BOLD}${GREEN}\u${RESET}"'@'"${CYAN}\h${RESET}"':'"${BLUE}\w${RESET}"'$(branch=$(parse_git_branch); [ -n "$branch" ] && echo " ${YELLOW} $branch${RESET}")\n➜ '
-else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+# Create symlink only if it doesn't already exist or is incorrect
+if [ ! -L "$LINK" ] || [ "$(readlink "$LINK")" != "$TARGET" ]; then
+  ln -sf "$TARGET" "$LINK"
 fi
 
 
 # setting zoxide (keep at the end)
 eval "$(zoxide init --cmd cd bash)"
 
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash

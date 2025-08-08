@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     ncdu \
     tldr \
     gpg \
+    ripgrep \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js (latest current version)
@@ -84,8 +85,13 @@ RUN git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 # Install Python tools
 RUN pip install pylint
 
-# Clone fzf-git.sh repo
-RUN git clone https://github.com/junegunn/fzf-git.sh.git /root/fzf-git
+# Install fzf via git method
+RUN git clone --depth 1 https://github.com/junegunn/fzf.git /root/.fzf && \
+    /root/.fzf/install --all --no-update-rc
+
+# Enable fzf in interactive shells
+RUN echo 'export PATH="$HOME/.fzf/bin:$PATH"' >> /root/.bashrc && \
+    echo '[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash' >> /root/.bashrc
 
 # Copy custom bashrc
 COPY .custom_bashrc /root/.custom_bashrc
@@ -100,8 +106,13 @@ RUN apt update && apt install -y locales \
     && locale-gen en_US.UTF-8 \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
-# Install zeoxide
+# Install zoxide
 RUN curl -fsSL https://apt.cli.rs/pubkey.asc | tee -a /usr/share/keyrings/rust-tools.asc
 RUN curl -fsSL https://apt.cli.rs/rust-tools.list | tee /etc/apt/sources.list.d/rust-tools.list
 RUN apt update
 RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+
+# Set git to have same permissions
+RUN git config --global --add safe.directory '*'
+
+
