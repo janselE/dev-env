@@ -5,9 +5,19 @@
 # Build the docker image
 docker build -t dev:1.0.0 .
 
-#!/bin/sh
 
-BASHRC="$HOME/.bashrc"
+# BASHRC="$HOME/.bashrc"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    BASHRC="$HOME/.bash_profile"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Linux (Ubuntu, Debian, etc.)
+    BASHRC="$HOME/.bashrc"
+else
+    echo "Unknown OS type: $OSTYPE"
+    BASHRC="$HOME/.bashrc"  # fallback
+fi
+
 BLOCK_START="# >>> docker dev-env aliases >>>"
 BLOCK_END="# <<< docker dev-env aliases <<<"
 
@@ -55,4 +65,4 @@ fi
 
 sudo apt install neovim python3-neovim
 
-source ~/.bashrc
+source "$BASHRC" 
