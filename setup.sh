@@ -5,8 +5,6 @@
 # Build the docker image
 docker build -t dev:1.0.0 .
 
-#!/bin/sh
-
 BASHRC="$HOME/.bashrc"
 BLOCK_START="# >>> docker dev-env aliases >>>"
 BLOCK_END="# <<< docker dev-env aliases <<<"
