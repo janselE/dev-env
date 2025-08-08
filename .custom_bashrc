@@ -87,6 +87,14 @@ _fzf_comprun() {
 
 # simlink to fd
 # ln -s $(which fdfind) ~/.local/bin/fd
+LINK="$HOME/.local/bin/fd"
+TARGET="$(which fdfind)"
+
+# Create symlink only if it doesn't already exist or is incorrect
+if [ ! -L "$LINK" ] || [ "$(readlink "$LINK")" != "$TARGET" ]; then
+  ln -sf "$TARGET" "$LINK"
+fi
+
 
 # setting zoxide (keep at the end)
 eval "$(zoxide init --cmd cd bash)"
