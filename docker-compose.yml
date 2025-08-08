@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  dev-env:
+    image: dev:1.0.0
+    container_name: dev-env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $HOME:$HOME
+      - /mnt:/mnt
+      - $HOME/.gitconfig:$HOME/.gitconfig:ro
+      - $HOME/.ssh:$HOME/.ssh:ro
+      - /tmp/nvim-socket:/tmp/nvim-socket
+    working_dir: ${PWD}
+    tty: true
+    stdin_open: true
+
