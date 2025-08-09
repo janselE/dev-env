@@ -55,15 +55,18 @@ RUN apt-get install -y \
       docker-compose-plugin
 
 
-# Install Neovim (latest from GitHub)
-RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz && \
-    rm -rf /opt/nvim && \
-    tar -C /opt -xzf nvim-linux-x86_64.tar.gz && \
-    rm nvim-linux-x86_64.tar.gz
+# Install Neovim 
+RUN apt-get update && apt-get install -y \
+    ninja-build gettext cmake unzip curl build-essential git && \
+    git clone https://github.com/neovim/neovim.git /tmp/neovim && \
+    cd /tmp/neovim && make CMAKE_BUILD_TYPE=Release && \
+    make install PREFIX=/root/.local && \
+    rm -rf /tmp/neovim
 
+# Ensure Neovim is in PATH
+ENV PATH="/root/.local/bin:${PATH}"
 # Copy Neovim config
 COPY nvim /root/.config/nvim
-# RUN mkdir -p /root/.config && ln -s /workspace/nvim /root/.config/nvim
 
 # Copy tmux config
 COPY .tmux.conf /root/.tmux.conf

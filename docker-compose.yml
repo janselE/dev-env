@@ -6,14 +6,16 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - $HOME:$HOME
-      - /mnt:/mnt
+      #- /mnt:/mnt
       - $HOME/.gitconfig:$HOME/.gitconfig:ro
       - $HOME/.ssh:$HOME/.ssh:ro
       - /tmp/nvim-socket:/tmp/nvim-socket
       - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
       - DISPLAY=${DISPLAY}
-    working_dir: ${PWD}
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+    working_dir: /root
     tty: true
     stdin_open: true
 
