@@ -13,7 +13,6 @@ return {
     local on_attach = function(client, bufnr)
       local opts = { noremap = true, silent = true, buffer = bufnr }
 
-      -- LSP navigation and actions
       keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts)
       keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
       keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts)
@@ -29,26 +28,20 @@ return {
       keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
     end
 
-    -- Customize diagnostic symbols
+    -- Diagnostic signs
     local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
     for type, icon in pairs(signs) do
       local hl = "DiagnosticSign" .. type
       vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
     end
 
-    -- LSP server setups
-    local lspconfig = require("lspconfig")
+    -- Define configs (0.11+)
+    vim.lsp.config("html", { capabilities = capabilities, on_attach = on_attach })
+    vim.lsp.config("ts_ls", { capabilities = capabilities, on_attach = on_attach })
+    vim.lsp.config("cssls", { capabilities = capabilities, on_attach = on_attach })
+    vim.lsp.config("tailwindcss", { capabilities = capabilities, on_attach = on_attach })
 
-    -- HTML
-    lspconfig.html.setup({ capabilities = capabilities, on_attach = on_attach })
-    -- TypeScript
-    lspconfig.ts_ls.setup({ capabilities = capabilities, on_attach = on_attach })
-    -- CSS
-    lspconfig.cssls.setup({ capabilities = capabilities, on_attach = on_attach })
-    -- TailwindCSS
-    lspconfig.tailwindcss.setup({ capabilities = capabilities, on_attach = on_attach })
-    -- Svelte
-    lspconfig.svelte.setup({
+    vim.lsp.config("svelte", {
       capabilities = capabilities,
       on_attach = function(client, bufnr)
         on_attach(client, bufnr)
@@ -62,24 +55,24 @@ return {
         })
       end,
     })
-    -- Prisma
-    lspconfig.prismals.setup({ capabilities = capabilities, on_attach = on_attach })
-    -- GraphQL
-    lspconfig.graphql.setup({
+
+    vim.lsp.config("prismals", { capabilities = capabilities, on_attach = on_attach })
+
+    vim.lsp.config("graphql", {
       capabilities = capabilities,
       on_attach = on_attach,
       filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },
     })
-    -- Emmet
-    lspconfig.emmet_ls.setup({
+
+    vim.lsp.config("emmet_ls", {
       capabilities = capabilities,
       on_attach = on_attach,
       filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
     })
-    -- Python
-    lspconfig.pyright.setup({ capabilities = capabilities, on_attach = on_attach })
-    -- Lua
-    lspconfig.lua_ls.setup({
+
+    vim.lsp.config("pyright", { capabilities = capabilities, on_attach = on_attach })
+
+    vim.lsp.config("lua_ls", {
       capabilities = capabilities,
       on_attach = on_attach,
       settings = {
@@ -94,6 +87,23 @@ return {
         },
       },
     })
+
+    -- Enable servers
+    local servers = {
+      "html",
+      "ts_ls",
+      "cssls",
+      "tailwindcss",
+      "svelte",
+      "prismals",
+      "graphql",
+      "emmet_ls",
+      "pyright",
+      "lua_ls",
+    }
+    for _, s in ipairs(servers) do
+      vim.lsp.enable(s)
+    end
   end,
 }
 
