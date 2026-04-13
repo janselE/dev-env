@@ -10,6 +10,7 @@ services:
       - $HOME/.gitconfig:$HOME/.gitconfig:ro
       - $HOME/.ssh:$HOME/.ssh:ro
       - /tmp/nvim-socket:/tmp/nvim-socket
+      - $HOME/Documents/dev-env/nvim:/root/.config/nvim
       - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
       - DISPLAY=${DISPLAY}

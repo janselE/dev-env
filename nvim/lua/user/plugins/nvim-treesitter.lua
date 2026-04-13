@@ -8,9 +8,11 @@ return {
 			"windwp/nvim-ts-autotag",
 		},
 		config = function()
-			-- On Neovim 0.12+, highlighting and indentation are built-in.
-			-- The plugin is now only for parser management.
-			require("nvim-treesitter.config").setup({})
+			require("nvim-treesitter.config").setup({
+				highlight = { enable = true },
+				indent = { enable = true },
+				autotag = { enable = true },
+			})
 
 			-- Install parsers if missing
 			local parsers = {

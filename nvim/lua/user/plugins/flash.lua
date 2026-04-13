@@ -4,6 +4,11 @@ return {
   opts = {
     -- optional: tweak the labels and search mode
     labels = "asdfghjklqwertyuiopzxcvbnm", -- similar feel to Hop
+    modes = {
+      char = {
+        enabled = false, -- disable flash override of f/F/t/T so ; and , repeat normally
+      },
+    },
     search = {
       multi_window = false,
       forward = true,

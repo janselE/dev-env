@@ -44,3 +44,6 @@ opt.swapfile = false
 opt.undofile = true
 opt.fileencoding = "utf-8"
 opt.writebackup = false
+
+-- suppress deprecation warnings from plugins not yet updated for 0.12
+vim.deprecate = function() end
