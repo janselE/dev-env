@@ -26,11 +26,13 @@ RUN apt-get update && apt-get install -y \
     tldr \
     gpg \
     ripgrep \
+    lsof \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js (latest current version)
 RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - && \
-    apt-get install -y nodejs
+    apt-get install -y nodejs && \
+    npm install -g neovim tree-sitter-cli
 
 # Install eza from official repo
 RUN mkdir -p /etc/apt/keyrings && \
@@ -86,7 +88,7 @@ RUN ln -s /usr/bin/batcat /usr/local/bin/bat
 RUN git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 # Install Python tools
-RUN pip install pylint
+RUN pip install pylint pynvim
 
 # Install fzf via git method
 RUN git clone --depth 1 https://github.com/junegunn/fzf.git /root/.fzf && \
