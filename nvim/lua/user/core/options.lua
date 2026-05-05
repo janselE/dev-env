@@ -47,3 +47,6 @@ opt.writebackup = false
 
 -- suppress deprecation warnings from plugins not yet updated for 0.12
 vim.deprecate = function() end
+
+-- Ensure treesitter parser install dir is in runtimepath
+vim.opt.runtimepath:append(vim.fn.stdpath("data") .. "/site")

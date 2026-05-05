@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
 # Install Node.js (latest current version)
 RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - && \
     apt-get install -y nodejs && \
-    npm install -g neovim tree-sitter-cli
+    npm install -g neovim
 
 # Install eza from official repo
 RUN mkdir -p /etc/apt/keyrings && \
@@ -65,8 +65,8 @@ RUN apt-get update && apt-get install -y \
     make install PREFIX=/root/.local && \
     rm -rf /tmp/neovim
 
-# Ensure Neovim is in PATH
-ENV PATH="/root/.local/bin:${PATH}"
+# Ensure Neovim and cargo are in PATH
+ENV PATH="/root/.local/bin:/root/.cargo/bin:${PATH}"
 # Copy Neovim config
 COPY nvim /root/.config/nvim
 
@@ -86,6 +86,13 @@ RUN ln -s /usr/bin/batcat /usr/local/bin/bat
 
 # Install tmux plugin manager
 RUN git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+# Install Rust and tree-sitter-cli (npm version requires GLIBC 2.39, Ubuntu 22.04 has 2.35)
+RUN apt-get update && apt-get install -y libclang-dev && \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path && \
+    /root/.cargo/bin/cargo install tree-sitter-cli && \
+    ln -sf /root/.cargo/bin/tree-sitter /usr/local/bin/tree-sitter && \
+    echo 'export PATH="/root/.cargo/bin:$PATH"' >> /root/.bashrc
 
 # Install Python tools
 RUN pip install pylint pynvim
