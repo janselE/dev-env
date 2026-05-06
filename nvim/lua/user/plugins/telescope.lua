@@ -25,6 +25,16 @@ return {
 
 		telescope.load_extension("fzf")
 
+		-- Patch for Neovim 0.12+: ft_to_lang and nvim-treesitter.configs were removed.
+		-- Remove this once telescope ships a 0.12-compatible release.
+		local preview_utils = require("telescope.previewers.utils")
+		preview_utils.ts_highlighter = function(bufnr, ft)
+			local get_lang = vim.treesitter.language.get_lang
+			local lang = get_lang and get_lang(ft) or ft
+			if not lang then return false end
+			return pcall(vim.treesitter.start, bufnr, lang)
+		end
+
 		-- set keymaps
 		local keymap = vim.keymap -- for conciseness
 

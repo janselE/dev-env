@@ -8,52 +8,52 @@ return {
 			"windwp/nvim-ts-autotag",
 		},
 		config = function()
-			-- import nvim-treesitter plugin
-			local treesitter = require("nvim-treesitter.configs")
-
-			-- configure treesitter
-			treesitter.setup({
-				-- enable syntax highlighting
-				highlight = {
-					enable = true,
-				},
-				-- enable indentation
+			require("nvim-treesitter.config").setup({
+				highlight = { enable = true },
 				indent = { enable = true },
-				-- enable autotagging (w/ nvim-ts-autotag plugin)
-				autotag = {
-					enable = true,
-				},
-				-- ensure these language parsers are installed
-				ensure_installed = {
-					"python",
-					"json",
-					"javascript",
-					"typescript",
-					"tsx",
-					"yaml",
-					"html",
-					"css",
-					"prisma",
-					"markdown",
-					"markdown_inline",
-					"svelte",
-					"graphql",
-					"bash",
-					"lua",
-					"vim",
-					"dockerfile",
-					"gitignore",
-					"query",
-				},
-				incremental_selection = {
-					enable = true,
-					keymaps = {
-						init_selection = "<C-space>",
-						node_incremental = "<C-space>",
-						scope_incremental = false,
-						node_decremental = "<bs>",
-					},
-				},
+				autotag = { enable = true },
+			})
+
+			-- Install parsers if missing
+			local parsers = {
+				"python",
+				"json",
+				"javascript",
+				"typescript",
+				"tsx",
+				"yaml",
+				"html",
+				"css",
+				"prisma",
+				"markdown",
+				"markdown_inline",
+				"svelte",
+				"graphql",
+				"bash",
+				"lua",
+				"vim",
+				"dockerfile",
+				"gitignore",
+				"query",
+			}
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "LazyDone",
+				once = true,
+				callback = function()
+					local installed = {}
+					for _, p in ipairs(vim.api.nvim_get_runtime_file("parser/*.so", true)) do
+						installed[vim.fn.fnamemodify(p, ":t:r")] = true
+					end
+					local to_install = {}
+					for _, lang in ipairs(parsers) do
+						if not installed[lang] then
+							table.insert(to_install, lang)
+						end
+					end
+					if #to_install > 0 then
+						vim.cmd("TSInstall " .. table.concat(to_install, " "))
+					end
+				end,
 			})
 
 			-- enable nvim-ts-context-commentstring without the deprecated module

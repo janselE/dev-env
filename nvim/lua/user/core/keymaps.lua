@@ -7,9 +7,9 @@ local keymap = vim.keymap -- for conciseness
 keymap.set("i", "jk", "<ESC>")
 keymap.set("n", "<leader>nh", ":nohl<CR>")
 
--- increase and decrease numbers
-keymap.set("n", "<leader>+", "<C-a>")
-keymap.set("n", "<leader>-", "<C-x>")
+-- increase and decrease numbers (noremap so claudecode's C-a/C-x remaps don't interfere)
+keymap.set("n", "<leader>+", "<C-a>", { noremap = true })
+keymap.set("n", "<leader>-", "<C-x>", { noremap = true })
 
 -- split management
 keymap.set("n", "vv", "<C-w>v") -- split vertically
