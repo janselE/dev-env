@@ -6,7 +6,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - $HOME:$HOME
-      #- /mnt:/mnt
+      - /mnt:/mnt
       - $HOME/.gitconfig:$HOME/.gitconfig:ro
       - $HOME/.ssh:$HOME/.ssh:ro
       - /tmp/nvim-socket:/tmp/nvim-socket
