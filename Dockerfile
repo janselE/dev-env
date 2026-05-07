@@ -27,6 +27,13 @@ RUN apt-get update && apt-get install -y \
     gpg \
     ripgrep \
     lsof \
+    btop \
+    file \
+    ffmpeg \
+    ffmpegthumbnailer \
+    unar \
+    poppler-utils \
+    imagemagick \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js (latest current version)
@@ -117,6 +124,21 @@ RUN apt-get update && apt-get install -y \
 RUN apt update && apt install -y locales \
     && locale-gen en_US.UTF-8 \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
+# Install lazydocker
+RUN LAZYDOCKER_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker/releases/latest" | jq -r '.tag_name' | sed 's/^v//') && \
+    curl -Lo /tmp/lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releases/download/v${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION}_Linux_x86_64.tar.gz" && \
+    tar -C /tmp -xf /tmp/lazydocker.tar.gz lazydocker && \
+    install /tmp/lazydocker /usr/local/bin/lazydocker && \
+    rm /tmp/lazydocker /tmp/lazydocker.tar.gz
+
+# Install yazi (musl build to avoid GLIBC 2.39 requirement)
+RUN YAZI_VERSION=$(curl -s "https://api.github.com/repos/sxyazi/yazi/releases/latest" | jq -r '.tag_name') && \
+    curl -Lo /tmp/yazi.zip "https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-musl.zip" && \
+    unzip /tmp/yazi.zip -d /tmp/yazi && \
+    install /tmp/yazi/yazi-x86_64-unknown-linux-musl/yazi /usr/local/bin/yazi && \
+    install /tmp/yazi/yazi-x86_64-unknown-linux-musl/ya /usr/local/bin/ya && \
+    rm -rf /tmp/yazi /tmp/yazi.zip
 
 # Install zoxide
 RUN curl -fsSL https://apt.cli.rs/pubkey.asc | tee -a /usr/share/keyrings/rust-tools.asc
