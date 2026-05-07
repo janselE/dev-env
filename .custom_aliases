@@ -1,0 +1,12 @@
+# Aliases
+alias ls="eza -a --color=always --git --no-filesize --icons=always --no-time --no-user --no-permissions"
+alias scan='ncdu'
+alias tree="eza --tree"
+alias cat='bat --paging=never'
+alias vim='nvim'
+
+# tmux aliases
+alias t='TERM=screen-256color-bce tmux'
+alias ta='TERM=screen-256color-bce tmux a -t'
+alias tls='TERM=screen-256color-bce tmux ls'
+alias tn='TERM=screen-256color-bce tmux new -t'
