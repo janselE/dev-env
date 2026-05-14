@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # THESE ARE COMMANDS THAT ARE RAN ON HOST
 
@@ -55,6 +55,13 @@ $BLOCK_END
 EOF
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ALIASES_LINE="source $SCRIPT_DIR/.custom_aliases"
+if ! grep -q "\.custom_aliases" "$BASHRC"; then
+  echo "$ALIASES_LINE" >> "$BASHRC"
+  echo "unalias vim 2>/dev/null" >> "$BASHRC"
+fi
+
 sudo apt install neovim python3-neovim
 
-source "$BASHRC" 
+source "$BASHRC"
