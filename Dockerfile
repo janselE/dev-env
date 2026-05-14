@@ -146,6 +146,9 @@ RUN curl -fsSL https://apt.cli.rs/rust-tools.list | tee /etc/apt/sources.list.d/
 RUN apt update
 RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
 
+# Install Claude CLI
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
 # Set git to have same permissions
 RUN git config --global --add safe.directory '*'
 
