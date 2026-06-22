@@ -35,6 +35,21 @@ return {
 			return pcall(vim.treesitter.start, bufnr, lang)
 		end
 
+		-- Patch for Neovim 0.12+: make_position_params now strictly requires position_encoding.
+		-- Remove this once telescope ships a 0.12-compatible release.
+		local orig_make_position_params = vim.lsp.util.make_position_params
+		vim.lsp.util.make_position_params = function(window, offset_encoding)
+			return orig_make_position_params(window, offset_encoding or "utf-16")
+		end
+
+		-- Patch for Neovim 0.12+: jump_to_location was removed; use show_document instead.
+		-- Remove this once telescope ships a 0.12-compatible release.
+		if not vim.lsp.util.jump_to_location then
+			vim.lsp.util.jump_to_location = function(location, offset_encoding, reuse_win)
+				return vim.lsp.util.show_document(location, offset_encoding, { reuse_win = reuse_win, focus = true })
+			end
+		end
+
 		-- set keymaps
 		local keymap = vim.keymap -- for conciseness
 
