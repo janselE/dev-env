@@ -28,9 +28,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BLOCK_START="# >>> docker dev-env aliases >>>"
 BLOCK_END="# <<< docker dev-env aliases <<<"
 
-# adds this section only if it has not been added yet
-if ! grep -q "$BLOCK_START" "$BASHRC"; then
-  cat << EOF >> "$BASHRC"
+# replace any existing block so re-running picks up changes to it
+if grep -q "$BLOCK_START" "$BASHRC"; then
+  sed -i "/^$BLOCK_START\$/,/^$BLOCK_END\$/d" "$BASHRC"
+fi
+cat << EOF >> "$BASHRC"
 $BLOCK_START
 TMUX_SESSIONS_FILE="$SCRIPT_DIR/tmux-sessions.conf"
 
@@ -40,9 +42,9 @@ devsessions() {
     return 0
   fi
   local name dir cmd
-  while IFS='|' read -r name dir cmd || [ -n "\$name" ]; do
+  while IFS='|' read -r name dir cmd <&3 || [ -n "\$name" ]; do
     [[ -z "\$name" || "\$name" == \#* ]] && continue
-    if tmux has-session -t "\$name" 2>/dev/null; then
+    if docker exec -u "\$(whoami)" -e HOME=/root dev-env tmux has-session -t "\$name" 2>/dev/null; then
       continue
     fi
     local args=(-d -s "\$name")
@@ -51,11 +53,11 @@ devsessions() {
       args+=(-c "\$dir")
     fi
     if [ -n "\$cmd" ]; then
-      tmux new-session "\${args[@]}" "\$cmd"
+      docker exec -u "\$(whoami)" -e HOME=/root dev-env tmux new-session "\${args[@]}" "\$cmd"
     else
-      tmux new-session "\${args[@]}"
+      docker exec -u "\$(whoami)" -e HOME=/root dev-env tmux new-session "\${args[@]}"
     fi
-  done < "\$sessions_file"
+  done 3< "\$sessions_file"
 }
 
 devstart() {
@@ -101,7 +103,6 @@ tmux() {
 }
 $BLOCK_END
 EOF
-fi
 
 ALIASES_LINE="source $SCRIPT_DIR/.custom_aliases"
 if ! grep -q "\.custom_aliases" "$BASHRC"; then
