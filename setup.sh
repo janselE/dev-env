@@ -24,6 +24,7 @@ else
     echo "Unknown OS type: $OSTYPE"
     BASHRC="$HOME/.bashrc"  # fallback
 fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BLOCK_START="# >>> docker dev-env aliases >>>"
 BLOCK_END="# <<< docker dev-env aliases <<<"
 
@@ -31,14 +32,53 @@ BLOCK_END="# <<< docker dev-env aliases <<<"
 if ! grep -q "$BLOCK_START" "$BASHRC"; then
   cat << EOF >> "$BASHRC"
 $BLOCK_START
+TMUX_SESSIONS_FILE="$SCRIPT_DIR/tmux-sessions.conf"
+
+devsessions() {
+  local sessions_file="\$TMUX_SESSIONS_FILE"
+  if [ ! -f "\$sessions_file" ]; then
+    return 0
+  fi
+  local name dir cmd
+  while IFS='|' read -r name dir cmd || [ -n "\$name" ]; do
+    [[ -z "\$name" || "\$name" == \#* ]] && continue
+    if tmux has-session -t "\$name" 2>/dev/null; then
+      continue
+    fi
+    local args=(-d -s "\$name")
+    if [ -n "\$dir" ]; then
+      dir="\$(eval echo "\$dir")"
+      args+=(-c "\$dir")
+    fi
+    if [ -n "\$cmd" ]; then
+      tmux new-session "\${args[@]}" "\$cmd"
+    else
+      tmux new-session "\${args[@]}"
+    fi
+  done < "\$sessions_file"
+}
+
 devstart() {
   local compose_file="$(pwd)/docker-compose.yml"
   if [ ! -f "\$compose_file" ]; then
     echo "Error: docker-compose.yml not found in current directory."
     return 1
   fi
+  xhost +local: >/dev/null
   docker compose -f "\$compose_file" down
   docker compose -f "\$compose_file" up -d
+
+  local retries=0
+  until docker exec dev-env true >/dev/null 2>&1; do
+    retries=\$((retries + 1))
+    if [ "\$retries" -ge 20 ]; then
+      echo "Warning: dev-env container did not become ready in time; skipping tmux session setup."
+      return 0
+    fi
+    sleep 0.5
+  done
+
+  devsessions
 }
 
 
@@ -63,7 +103,6 @@ $BLOCK_END
 EOF
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ALIASES_LINE="source $SCRIPT_DIR/.custom_aliases"
 if ! grep -q "\.custom_aliases" "$BASHRC"; then
   echo "$ALIASES_LINE" >> "$BASHRC"
