@@ -2,8 +2,16 @@
 
 # THESE ARE COMMANDS THAT ARE RAN ON HOST
 
-# Build the docker image
-docker build -t dev:1.0.0 .
+# Build the docker image, matching the current user's UID/GID and the
+# docker.sock group's GID so files/containers created inside come out
+# owned correctly on the host instead of as root.
+DOCKER_GID="$(getent group docker | cut -d: -f3)"
+docker build -t dev:2.0.0 \
+  --build-arg USER_UID="$(id -u)" \
+  --build-arg USER_GID="$(id -g)" \
+  --build-arg USERNAME="$(whoami)" \
+  --build-arg DOCKER_GID="${DOCKER_GID:-1001}" \
+  .
 
 # BASHRC="$HOME/.bashrc"
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -37,7 +45,7 @@ devstart() {
 vim() {
 
   if docker ps --format '{{.Names}}' | grep -q '^dev-env$'; then
-    docker exec -it -w "\$(pwd)" dev-env nvim "\$@"
+    docker exec -it -u "\$(whoami)" -e HOME=/root -w "\$(pwd)" dev-env nvim "\$@"
   else
     command vim "\$@"
   fi
@@ -46,7 +54,7 @@ vim() {
 
 tmux() {
   if docker ps --format '{{.Names}}' | grep -q '^dev-env$'; then
-    docker exec -it -w "\$(pwd)" dev-env tmux -2 "\$@"
+    docker exec -it -u "\$(whoami)" -e HOME=/root -w "\$(pwd)" dev-env tmux -2 "\$@"
   else
     command tmux "\$@"
   fi

@@ -149,7 +149,29 @@ RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install
 # Install Claude CLI
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
+# Install AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && \
+    unzip /tmp/awscliv2.zip -d /tmp && \
+    /tmp/aws/install && \
+    rm -rf /tmp/awscliv2.zip /tmp/aws
+
 # Set git to have same permissions
 RUN git config --global --add safe.directory '*'
 
+# Create a non-root user matching the host's UID/GID so files created
+# in the bind-mounted $HOME come out owned by the host user instead of root.
+# Home is set to /root so all the config copied/installed above (nvim, tmux,
+# cargo, bashrc, fzf, tpm) keeps working unchanged.
+ARG USER_UID=1000
+ARG USER_GID=1000
+ARG USERNAME=devuser
+
+RUN (groupadd -g ${USER_GID} ${USERNAME} || true) \
+    && useradd -M -u ${USER_UID} -g ${USER_GID} -G docker -d /root -s /bin/bash ${USERNAME} \
+    && chown -R ${USER_UID}:${USER_GID} /root
+
+# Align the docker group's GID with the host so the exec user can reach
+# the bind-mounted docker.sock (its host group GID, not 1001, may vary).
+ARG DOCKER_GID=1001
+RUN groupmod -g ${DOCKER_GID} docker
 

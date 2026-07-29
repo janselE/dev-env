@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   dev-env:
-    image: dev:1.0.0
+    image: dev:2.0.0
     container_name: dev-env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -9,8 +9,10 @@ services:
       - /mnt:/mnt
       - $HOME/.gitconfig:/root/.gitconfig:ro
       - $HOME/.ssh:/root/.ssh:ro
+      - $HOME/.aws:/root/.aws:ro
       - /tmp/nvim-socket:/tmp/nvim-socket
       - ./nvim:/root/.config/nvim
+      - ./.tmux.conf:/root/.tmux.conf
       - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
       - DISPLAY=${DISPLAY}
