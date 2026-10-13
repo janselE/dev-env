@@ -5,13 +5,18 @@
 # Build the docker image, matching the current user's UID/GID and the
 # docker.sock group's GID so files/containers created inside come out
 # owned correctly on the host instead of as root.
-DOCKER_GID="$(getent group docker | cut -d: -f3)"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # no getent on macOS; use the GID that owns the socket inside the Docker VM
+  DOCKER_GID="$(docker run --rm -v /var/run/docker.sock:/var/run/docker.sock alpine stat -c %g /var/run/docker.sock)"
+else
+  DOCKER_GID="$(getent group docker | cut -d: -f3)"
+fi
 docker build -t dev:2.0.0 \
   --build-arg USER_UID="$(id -u)" \
   --build-arg USER_GID="$(id -g)" \
   --build-arg USERNAME="$(whoami)" \
   --build-arg DOCKER_GID="${DOCKER_GID:-1001}" \
-  .
+  . || { echo "docker build failed; aborting" >&2; exit 1; }
 
 # BASHRC="$HOME/.bashrc"
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -30,7 +35,11 @@ BLOCK_END="# <<< docker dev-env aliases <<<"
 
 # replace any existing block so re-running picks up changes to it
 if grep -q "$BLOCK_START" "$BASHRC"; then
-  sed -i "/^$BLOCK_START\$/,/^$BLOCK_END\$/d" "$BASHRC"
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "/^$BLOCK_START\$/,/^$BLOCK_END\$/d" "$BASHRC"
+  else
+    sed -i "/^$BLOCK_START\$/,/^$BLOCK_END\$/d" "$BASHRC"
+  fi
 fi
 cat << EOF >> "$BASHRC"
 $BLOCK_START
@@ -66,7 +75,7 @@ devstart() {
     echo "Error: docker-compose.yml not found in current directory."
     return 1
   fi
-  xhost +local: >/dev/null
+  command -v xhost >/dev/null 2>&1 && xhost +local: >/dev/null
   docker compose -f "\$compose_file" down
   docker compose -f "\$compose_file" up -d
 
@@ -110,6 +119,8 @@ if ! grep -q "\.custom_aliases" "$BASHRC"; then
   echo "unalias vim 2>/dev/null" >> "$BASHRC"
 fi
 
-sudo apt install neovim python3-neovim
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  sudo apt install neovim python3-neovim
+fi
 
 source "$BASHRC"

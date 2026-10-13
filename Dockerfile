@@ -81,9 +81,10 @@ COPY nvim /root/.config/nvim
 COPY .tmux.conf /root/.tmux.conf
 
 # Install lazygit (inside container only)
-RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | jq -r '.tag_name' | sed 's/^v//') && \
+RUN ARCH=$(uname -m | sed 's/aarch64/arm64/') && \
+    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | jq -r '.tag_name' | sed 's/^v//') && \
     mkdir -p /tmp/lazygit && \
-    curl -Lo /tmp/lazygit/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" && \
+    curl -Lo /tmp/lazygit/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_${ARCH}.tar.gz" && \
     tar -C /tmp/lazygit -xf /tmp/lazygit/lazygit.tar.gz lazygit && \
     install /tmp/lazygit/lazygit /usr/local/bin/ && \
     rm -rf /tmp/lazygit
@@ -126,18 +127,20 @@ RUN apt update && apt install -y locales \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
 # Install lazydocker
-RUN LAZYDOCKER_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker/releases/latest" | jq -r '.tag_name' | sed 's/^v//') && \
-    curl -Lo /tmp/lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releases/download/v${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION}_Linux_x86_64.tar.gz" && \
+RUN ARCH=$(uname -m | sed 's/aarch64/arm64/') && \
+    LAZYDOCKER_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker/releases/latest" | jq -r '.tag_name' | sed 's/^v//') && \
+    curl -Lo /tmp/lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releases/download/v${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION}_Linux_${ARCH}.tar.gz" && \
     tar -C /tmp -xf /tmp/lazydocker.tar.gz lazydocker && \
     install /tmp/lazydocker /usr/local/bin/lazydocker && \
     rm /tmp/lazydocker /tmp/lazydocker.tar.gz
 
 # Install yazi (musl build to avoid GLIBC 2.39 requirement)
-RUN YAZI_VERSION=$(curl -s "https://api.github.com/repos/sxyazi/yazi/releases/latest" | jq -r '.tag_name') && \
-    curl -Lo /tmp/yazi.zip "https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-musl.zip" && \
+RUN ARCH=$(uname -m) && \
+    YAZI_VERSION=$(curl -s "https://api.github.com/repos/sxyazi/yazi/releases/latest" | jq -r '.tag_name') && \
+    curl -Lo /tmp/yazi.zip "https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-${ARCH}-unknown-linux-musl.zip" && \
     unzip /tmp/yazi.zip -d /tmp/yazi && \
-    install /tmp/yazi/yazi-x86_64-unknown-linux-musl/yazi /usr/local/bin/yazi && \
-    install /tmp/yazi/yazi-x86_64-unknown-linux-musl/ya /usr/local/bin/ya && \
+    install /tmp/yazi/yazi-${ARCH}-unknown-linux-musl/yazi /usr/local/bin/yazi && \
+    install /tmp/yazi/yazi-${ARCH}-unknown-linux-musl/ya /usr/local/bin/ya && \
     rm -rf /tmp/yazi /tmp/yazi.zip
 
 # Install zoxide
@@ -150,7 +153,7 @@ RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Install AWS CLI v2
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && \
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "/tmp/awscliv2.zip" && \
     unzip /tmp/awscliv2.zip -d /tmp && \
     /tmp/aws/install && \
     rm -rf /tmp/awscliv2.zip /tmp/aws
@@ -167,7 +170,7 @@ ARG USER_GID=1000
 ARG USERNAME=devuser
 
 RUN (groupadd -g ${USER_GID} ${USERNAME} || true) \
-    && useradd -M -u ${USER_UID} -g ${USER_GID} -G docker -d /root -s /bin/bash ${USERNAME} \
+    && useradd -l -M -u ${USER_UID} -g ${USER_GID} -G docker -d /root -s /bin/bash ${USERNAME} \
     && chown -R ${USER_UID}:${USER_GID} /root
 
 # Align the docker group's GID with the host so the exec user can reach
