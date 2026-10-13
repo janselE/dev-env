@@ -2,6 +2,21 @@
 
 # THESE ARE COMMANDS THAT ARE RAN ON HOST
 
+# macOS has no native Docker engine: install Colima (+ docker CLI/compose)
+# via Homebrew and make sure the VM is running before anything uses docker.
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  if ! command -v brew >/dev/null 2>&1; then
+    echo "Homebrew is required on macOS: https://brew.sh" >&2
+    exit 1
+  fi
+  for pkg in colima docker docker-compose; do
+    brew list --formula "$pkg" >/dev/null 2>&1 || brew install "$pkg"
+  done
+  if ! colima status >/dev/null 2>&1; then
+    colima start
+  fi
+fi
+
 # Build the docker image, matching the current user's UID/GID and the
 # docker.sock group's GID so files/containers created inside come out
 # owned correctly on the host instead of as root.
