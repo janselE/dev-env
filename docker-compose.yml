@@ -18,6 +18,7 @@ services:
       - DISPLAY=${DISPLAY}
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
+    network_mode: host
     working_dir: /root
     tty: true
     stdin_open: true
